@@ -265,7 +265,9 @@ static void print_error_for_unit_test(const char* message, const char* detail_fm
 
 void report_vm_error(const char* file, int line, const char* error_msg, const char* detail_fmt, ...)
 {
+#ifndef __clang_analyzer__
   if (Debugging || error_is_suppressed(file, line)) return;
+#endif
   va_list detail_args;
   va_start(detail_args, detail_fmt);
   void* context = NULL;
@@ -287,7 +289,9 @@ void report_vm_status_error(const char* file, int line, const char* error_msg,
 }
 
 void report_fatal(VMErrorType error_type, const char* file, int line, const char* detail_fmt, ...) {
+#ifndef __clang_analyzer__
   if (Debugging || error_is_suppressed(file, line)) return;
+#endif
   va_list detail_args;
   va_start(detail_args, detail_fmt);
   void* context = NULL;

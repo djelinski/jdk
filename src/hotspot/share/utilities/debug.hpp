@@ -159,11 +159,23 @@ enum VMErrorType {
 extern bool Debugging;
 
 // error reporting helper functions
+#ifdef __clang_analyzer__
+[[ noreturn ]]
+#endif
 void report_vm_error(const char* file, int line, const char* error_msg);
+#ifdef __clang_analyzer__
+[[ noreturn ]]
+#endif
 void report_vm_error(const char* file, int line, const char* error_msg,
                      const char* detail_fmt, ...) ATTRIBUTE_PRINTF(4, 5);
+#ifdef __clang_analyzer__
+[[ noreturn ]]
+#endif
 void report_vm_status_error(const char* file, int line, const char* error_msg,
                             int status, const char* detail);
+#ifdef __clang_analyzer__
+[[ noreturn ]]
+#endif
 void report_fatal(VMErrorType error_type, const char* file, int line, const char* detail_fmt, ...) ATTRIBUTE_PRINTF(4, 5);
 void report_vm_out_of_memory(const char* file, int line, size_t size, VMErrorType vm_err_type,
                              const char* detail_fmt, ...) ATTRIBUTE_PRINTF(5, 6);
