@@ -261,6 +261,9 @@ function convert_pathlist() {
       else
         winpath="${winpath//'\'/'/'}"
       fi
+    elif [[ -z $arg ]] ; then
+      # empty path segment... ignore
+      :
     else
       # This does not look like a path, so assume this is not a proper pathlist.
       # Flag this to caller.

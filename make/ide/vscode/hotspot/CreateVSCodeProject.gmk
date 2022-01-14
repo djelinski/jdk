@@ -73,6 +73,15 @@ else
 endif
 
 ################################################################################
+# Retrieve PATH variable; convert if necessary
+################################################################################
+ifeq ($(call isTargetOs, windows), true)
+  SysPath = $(call FixPath,"$(PATH)")
+else
+  SysPath = $(PATH)
+endif
+
+################################################################################
 # Create a project configuration from a given template, replacing a known set
 # of variables.
 #
@@ -93,7 +102,7 @@ define CreateFromTemplate
 	    -e 's!{{CONF_NAME}}!$(CONF_NAME)!g' \
 	    -e 's!{{COMPILER}}!$(call SedEscape,$(call FixPath,$(CXX))) $(SYSROOT_CFLAGS)!g' \
 	    -e 's!{{MAKE}}!$(call SedEscape,$(call FixPath,$(MAKE)))!g' \
-	    -e 's!{{PATH}}!$(call SedEscape,$(call FixPath,$(PATH)))!g' \
+	    -e 's!{{PATH}}!$(call SedEscape,$(SysPath))!g' \
 	    -e 's!{{DEBUGENGINENAME}}!$(call DebugEngineName)!g' \
 	    -e '/{{INDEXER_EXTENSIONS}}/d' \
 	    -e '/{{INDEXER_SETTINGS}}/d' \
