@@ -35,6 +35,7 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 
 import java.nio.ByteBuffer;
@@ -54,20 +55,22 @@ import javax.net.ssl.TrustManagerFactory;
 @Warmup(iterations = 5, time = 5)
 @Measurement(iterations = 5, time = 5)
 @Fork(value = 3)
+@Threads(Threads.MAX)
 public class SSLHandshake {
 
     private SSLContext sslc;
 
-    private SSLEngine clientEngine;
-    private ByteBuffer clientOut = ByteBuffer.allocate(5);
-    private ByteBuffer clientIn = ByteBuffer.allocate(1 << 15);
+    @State(Scope.Thread)
+    public static class ThreadState {
+        private ByteBuffer clientOut = ByteBuffer.allocate(5);
+        private ByteBuffer clientIn = ByteBuffer.allocate(1 << 15);
 
-    private SSLEngine serverEngine;
-    private ByteBuffer serverOut = ByteBuffer.allocate(5);
-    private ByteBuffer serverIn = ByteBuffer.allocate(1 << 15);
+        private ByteBuffer serverOut = ByteBuffer.allocate(5);
+        private ByteBuffer serverIn = ByteBuffer.allocate(1 << 15);
 
-    private ByteBuffer cTOs = ByteBuffer.allocateDirect(1 << 16);
-    private ByteBuffer sTOc = ByteBuffer.allocateDirect(1 << 16);
+        private ByteBuffer cTOs = ByteBuffer.allocateDirect(1 << 16);
+        private ByteBuffer sTOc = ByteBuffer.allocateDirect(1 << 16);
+    }
 
     @Param({"true", "false"})
     boolean resume;
@@ -112,9 +115,32 @@ public class SSLHandshake {
      * The client and the server both operate on the same thread.
      */
     @Benchmark
-    public SSLSession doHandshake() throws Exception {
+    @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
+    @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
+    @Fork(3)
+    public SSLSession doHandshake(ThreadState ts) throws Exception {
+        /*
+         * Configure the serverEngine to act as a server in the SSL/TLS
+         * handshake.
+         */
+        SSLEngine serverEngine = sslc.createSSLEngine();
+        serverEngine.setUseClientMode(false);
 
-        createSSLEngines();
+        /*
+         * Similar to above, but using client mode instead.
+         */
+        SSLEngine clientEngine = sslc.createSSLEngine("client", 80);
+        clientEngine.setUseClientMode(true);
+
+        ByteBuffer clientOut = ts.clientOut;
+        ByteBuffer clientIn = ts.clientIn;
+
+        ByteBuffer serverOut = ts.serverOut;
+        ByteBuffer serverIn = ts.serverIn;
+
+        ByteBuffer cTOs = ts.cTOs;
+        ByteBuffer sTOc = ts.sTOc;
+
         boolean isCtoS = true;
         for (;;) {
             HandshakeStatus result;
@@ -167,18 +193,4 @@ public class SSLHandshake {
         return session;
     }
 
-    private void createSSLEngines() {
-        /*
-         * Configure the serverEngine to act as a server in the SSL/TLS
-         * handshake.
-         */
-        serverEngine = sslc.createSSLEngine();
-        serverEngine.setUseClientMode(false);
-
-        /*
-         * Similar to above, but using client mode instead.
-         */
-        clientEngine = sslc.createSSLEngine("client", 80);
-        clientEngine.setUseClientMode(true);
-    }
 }
