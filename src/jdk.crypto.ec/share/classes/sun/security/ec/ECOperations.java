@@ -194,7 +194,7 @@ public class ECOperations {
     /*
      * 4-bit branchless array lookup for projective points.
      */
-    private void lookup4(ProjectivePoint.Immutable[] arr, int index,
+    private void lookup4(Point[] arr, int index,
         ProjectivePoint.Mutable result, IntegerModuloP zero) {
 
         for (int i = 0; i < 16; i++) {
@@ -206,7 +206,7 @@ public class ECOperations {
             int inverse = bit0 | bit1 | bit2 | bit3;
             int set = 1 - inverse;
 
-            ProjectivePoint.Immutable pi = arr[i];
+            Point pi = arr[i];
             result.conditionalSet(pi, set);
         }
     }
@@ -246,8 +246,8 @@ public class ECOperations {
         ProjectivePoint.Mutable result = new ProjectivePoint.Mutable(field);
         result.getY().setValue(field.get1().mutable());
 
-        ProjectivePoint.Immutable[] pointMultiples =
-            new ProjectivePoint.Immutable[16];
+        Point[] pointMultiples =
+            new Point[16];
         // 0P is neutral---same as initial result value
         pointMultiples[0] = result.fixed();
 
@@ -257,9 +257,12 @@ public class ECOperations {
         pointMultiples[1] = ps.fixed();
 
         // the rest are calculated using mixed point addition
-        for (int i = 2; i < 16; i++) {
-            setSum(ps, affineP, t0, t1, t2, t3, t4);
+        for (int i = 2; i < 16; i += 2) {
+            ps = (ProjectivePoint.Mutable) pointMultiples[i >> 1].mutable();
+            setDouble(ps, t0, t1, t2, t3, t4);
             pointMultiples[i] = ps.fixed();
+            setSum(ps, affineP, t0, t1, t2, t3, t4);
+            pointMultiples[i + 1] = ps;
         }
 
         ProjectivePoint.Mutable lookupResult = ps.mutable();
