@@ -56,7 +56,7 @@ public class NTLMAuthSequence {
 
     Status status;
 
-    NTLMAuthSequence (String username, String password, String ntdomain)
+    public NTLMAuthSequence (String username, String password, String ntdomain)
     throws IOException
     {
         this.username = username;
