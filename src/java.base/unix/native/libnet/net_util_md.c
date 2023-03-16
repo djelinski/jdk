@@ -101,14 +101,14 @@ jboolean  IPv4_supported()
 }
 
 #if defined(DONT_ENABLE_IPV6)
-jint  IPv6_supported()
+jboolean  IPv6_supported()
 {
     return JNI_FALSE;
 }
 
 #else /* !DONT_ENABLE_IPV6 */
 
-jint  IPv6_supported()
+jboolean  IPv6_supported()
 {
     int fd;
     void *ipv6_fn;

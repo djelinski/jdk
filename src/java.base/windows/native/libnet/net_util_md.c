@@ -208,7 +208,7 @@ jboolean  IPv4_supported()
     return JNI_TRUE;
 }
 
-jint  IPv6_supported()
+jboolean  IPv6_supported()
 {
     SOCKET s = socket(AF_INET6, SOCK_STREAM, 0) ;
     if (s == INVALID_SOCKET) {
