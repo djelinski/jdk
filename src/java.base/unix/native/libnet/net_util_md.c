@@ -188,7 +188,7 @@ void NET_ThrowUnknownHostExceptionWithGaiError(JNIEnv *env,
 {
     int size;
     char *buf;
-    const char *format = "%s: %s";
+    const char * const format = "%s: %s";
     const char *error_string = gai_strerror(gai_error);
     if (error_string == NULL)
         error_string = "unknown error";
