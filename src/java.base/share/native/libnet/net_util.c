@@ -28,25 +28,25 @@
 #include "java_net_InetAddress.h"
 #include "java_net_spi_InetAddressResolver_LookupPolicy.h"
 
-int IPv4_supported();
-int IPv6_supported();
-int reuseport_supported(int ipv6_available);
+jboolean IPv4_supported();
+jboolean IPv6_supported();
+jboolean reuseport_supported(jboolean ipv6_available);
 
-static int IPv4_available;
-static int IPv6_available;
-static int REUSEPORT_available;
+static jboolean IPv4_available;
+static jboolean IPv6_available;
+static jboolean REUSEPORT_available;
 
-JNIEXPORT jint JNICALL ipv4_available()
+JNIEXPORT jboolean JNICALL ipv4_available()
 {
     return IPv4_available;
 }
 
-JNIEXPORT jint JNICALL ipv6_available()
+JNIEXPORT jboolean JNICALL ipv6_available()
 {
     return IPv6_available;
 }
 
-JNIEXPORT jint JNICALL reuseport_available()
+JNIEXPORT jboolean JNICALL reuseport_available()
 {
     return REUSEPORT_available;
 }
@@ -58,7 +58,7 @@ DEF_JNI_OnLoad(JavaVM *vm, void *reserved)
     jclass iCls;
     jmethodID mid;
     jstring s;
-    jint preferIPv4Stack;
+    jboolean preferIPv4Stack;
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_2) != JNI_OK) {
         return JNI_EVERSION; /* JNI version not supported */
     }
@@ -77,7 +77,7 @@ DEF_JNI_OnLoad(JavaVM *vm, void *reserved)
      * supporting socket APIs are available
      */
     IPv4_available = IPv4_supported();
-    IPv6_available = IPv6_supported() & (!preferIPv4Stack);
+    IPv6_available = IPv6_supported() && (!preferIPv4Stack);
 
     /* check if SO_REUSEPORT is supported on this platform */
     REUSEPORT_available = reuseport_supported(IPv6_available);

@@ -108,7 +108,7 @@ Java_sun_nio_ch_Net_isIPv6Available0(JNIEnv* env, jclass cl)
     /*
      * Return true if IPv6 is configured
      */
-    return ipv6_available() ? JNI_TRUE : JNI_FALSE;
+    return ipv6_available();
 }
 
 JNIEXPORT jboolean JNICALL

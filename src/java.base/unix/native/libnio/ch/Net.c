@@ -141,13 +141,13 @@ Java_sun_nio_ch_Net_initIDs(JNIEnv *env, jclass clazz)
 JNIEXPORT jboolean JNICALL
 Java_sun_nio_ch_Net_isIPv6Available0(JNIEnv* env, jclass cl)
 {
-    return (ipv6_available()) ? JNI_TRUE : JNI_FALSE;
+    return ipv6_available();
 }
 
 JNIEXPORT jboolean JNICALL
 Java_sun_nio_ch_Net_isReusePortAvailable0(JNIEnv* env, jclass c1)
 {
-    return (reuseport_available()) ? JNI_TRUE : JNI_FALSE;
+    return reuseport_available();
 }
 
 JNIEXPORT jint JNICALL

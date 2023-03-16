@@ -110,10 +110,10 @@ JNIEXPORT void JNICALL Java_java_net_NetworkInterface_init(JNIEnv *env, jclass c
 JNIEXPORT void JNICALL NET_ThrowNew(JNIEnv *env, int errorNum, char *msg);
 
 
-JNIEXPORT jint JNICALL ipv4_available();
-JNIEXPORT jint JNICALL ipv6_available();
+JNIEXPORT jboolean JNICALL ipv4_available();
+JNIEXPORT jboolean JNICALL ipv6_available();
 
-JNIEXPORT jint JNICALL reuseport_available();
+JNIEXPORT jboolean JNICALL reuseport_available();
 
 /**
  * This function will fill a SOCKETADDRESS structure from an InetAddress

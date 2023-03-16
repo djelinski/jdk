@@ -90,7 +90,7 @@ NET_ThrowNew(JNIEnv *env, int errorNumber, char *msg) {
     }
 }
 
-jint  IPv4_supported()
+jboolean  IPv4_supported()
 {
     int fd = socket(AF_INET, SOCK_STREAM, 0) ;
     if (fd < 0) {
@@ -159,7 +159,7 @@ jint  IPv6_supported()
 }
 #endif /* DONT_ENABLE_IPV6 */
 
-jint reuseport_supported(int ipv6_available)
+jboolean reuseport_supported(jboolean ipv6_available)
 {
     /* Do a simple dummy call, and try to figure out from that */
     int one = 1;

@@ -197,7 +197,7 @@ NET_ThrowByNameWithLastError(JNIEnv *env, const char *name,
     JNU_ThrowByNameWithMessageAndLastError(env, name, defaultDetail);
 }
 
-jint  IPv4_supported()
+jboolean  IPv4_supported()
 {
     SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
     if (s == INVALID_SOCKET) {
@@ -219,7 +219,7 @@ jint  IPv6_supported()
     return JNI_TRUE;
 }
 
-jint reuseport_supported(int ipv6_available)
+jboolean reuseport_supported(jboolean ipv6_available)
 {
     /* SO_REUSEPORT is not supported on Windows */
     return JNI_FALSE;
