@@ -245,7 +245,7 @@ AC_DEFUN([FLAGS_SETUP_SYSROOT_FLAGS],
   # Visual Studio environment. Currently we cannot handle this as a separate
   # build toolchain.
   if test "x$1" = x && test "x$OPENJDK_BUILD_OS" = "xwindows" \
-      && test "x$TOOLCHAIN_TYPE" = "xmicrosoft"; then
+      && test "x$TOOLCHAIN_TYPE" = "xmicrosoft" -o "x$TOOLCHAIN_TYPE" = xmscl; then
     TOOLCHAIN_SETUP_VISUAL_STUDIO_ENV
   fi
 
@@ -307,7 +307,7 @@ AC_DEFUN_ONCE([FLAGS_PRE_TOOLCHAIN],
   LDFLAGS="$GLOBAL_LDFLAGS"
   CPPFLAGS="$GLOBAL_CPPFLAGS"
 
-  if test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  if test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     # When autoconf sends both compiler and linker flags to cl.exe at the same
     # time, linker flags must be last at the command line. Achieve this by
     # moving them to LIBS.
@@ -318,7 +318,7 @@ AC_DEFUN_ONCE([FLAGS_PRE_TOOLCHAIN],
 
 AC_DEFUN([FLAGS_SETUP_TOOLCHAIN_CONTROL],
 [
-  if test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  if test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     CC_OUT_OPTION=-Fo
     if test "x$OPENJDK_TARGET_CPU" != xaarch64; then
       AS_NON_ASM_EXTENSION_OPTION=-Ta

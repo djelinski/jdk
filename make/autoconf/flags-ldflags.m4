@@ -83,10 +83,10 @@ AC_DEFUN([FLAGS_SETUP_LDFLAGS_HELPER],
       BASIC_LDFLAGS_JVM_ONLY="$BASIC_LDFLAGS_JVM_ONLY -Wl,-lC_r -Wl,-bbigtoc"
     fi
 
-  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     BASIC_LDFLAGS="-opt:ref"
     BASIC_LDFLAGS_JDK_ONLY="-incremental:no"
-    BASIC_LDFLAGS_JVM_ONLY="-opt:icf,8 -subsystem:windows"
+    BASIC_LDFLAGS_JVM_ONLY="-opt:icf=8 -subsystem:windows"
   fi
 
   if (test "x$TOOLCHAIN_TYPE" = xgcc || test "x$TOOLCHAIN_TYPE" = xclang) \
@@ -139,7 +139,7 @@ AC_DEFUN([FLAGS_SETUP_LDFLAGS_HELPER],
   fi
 
   if test "x$ALLOW_ABSOLUTE_PATHS_IN_OUTPUT" = "xfalse"; then
-    if test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+    if test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
       BASIC_LDFLAGS="$BASIC_LDFLAGS -pdbaltpath:%_PDB%"
       # PATHMAP_FLAGS is setup in flags-cflags.m4.
       FILE_MACRO_LDFLAGS="${PATHMAP_FLAGS}"
@@ -178,7 +178,7 @@ AC_DEFUN([FLAGS_SETUP_LDFLAGS_CPU_DEP],
       $1_CPU_LDFLAGS="${$1_CPU_LDFLAGS} -Wl,--hash-style=gnu"
     fi
 
-  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     if test "x${OPENJDK_$1_CPU_BITS}" = "x32"; then
       $1_CPU_EXECUTABLE_LDFLAGS="-stack:327680"
     elif test "x${OPENJDK_$1_CPU_BITS}" = "x64"; then

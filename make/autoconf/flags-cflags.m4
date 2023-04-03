@@ -77,7 +77,7 @@ AC_DEFUN([FLAGS_SETUP_SHARED_LIBS],
       fi
     fi
 
-  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     SHARED_LIBRARY_FLAGS="-dll"
     SET_EXECUTABLE_ORIGIN=''
     SET_SHARED_LIBRARY_ORIGIN=''
@@ -146,7 +146,7 @@ AC_DEFUN([FLAGS_SETUP_DEBUG_SYMBOLS],
 
     CFLAGS_DEBUG_SYMBOLS="-g ${GDWARF_FLAGS}"
     ASFLAGS_DEBUG_SYMBOLS="-g"
-  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     CFLAGS_DEBUG_SYMBOLS="-Z7"
   fi
 
@@ -266,6 +266,19 @@ AC_DEFUN([FLAGS_SETUP_WARNINGS],
       # false positives.
       DISABLED_WARNINGS="unknown-warning-option unused-parameter"
       ;;
+
+    mscl)
+      DISABLE_WARNING_PREFIX="-Wno-"
+      BUILD_CC_DISABLE_WARNING_PREFIX="-Wno-"
+      CFLAGS_WARNINGS_ARE_ERRORS="-Werror"
+
+      # Additional warnings that are not activated by -Wall and -Wextra
+      WARNINGS_ENABLE_ADDITIONAL="-Wpointer-arith -Wsign-compare -Wreorder \
+          -Wunused-function -Wundef -Wunused-value -Woverloaded-virtual"
+      WARNINGS_ENABLE_ALL="-W4 $WARNINGS_ENABLE_ADDITIONAL"
+
+      DISABLED_WARNINGS="unknown-warning-option unused-parameter unused invalid-offsetof"
+      ;;
   esac
   AC_SUBST(DISABLE_WARNING_PREFIX)
   AC_SUBST(BUILD_CC_DISABLE_WARNING_PREFIX)
@@ -339,7 +352,7 @@ AC_DEFUN([FLAGS_SETUP_OPTIMIZATION],
       C_O_FLAG_DEBUG_JVM="${C_O_FLAG_DEBUG_JVM} ${DISABLE_FORTIFY_CFLAGS}"
       C_O_FLAG_NONE="${C_O_FLAG_NONE} ${DISABLE_FORTIFY_CFLAGS}"
     fi
-  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     C_O_FLAG_HIGHEST_JVM="-O2 -Oy-"
     C_O_FLAG_HIGHEST="-O2"
     C_O_FLAG_HI="-O1"
@@ -508,7 +521,7 @@ AC_DEFUN([FLAGS_SETUP_CFLAGS_HELPER],
     ALWAYS_DEFINES_JVM="-D_GNU_SOURCE -D_REENTRANT"
   elif test "x$TOOLCHAIN_TYPE" = xclang; then
     ALWAYS_DEFINES_JVM="-D_GNU_SOURCE"
-  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     # _WIN32_WINNT=0x0602 means access APIs for Windows 8 and above. See
     # https://docs.microsoft.com/en-us/cpp/porting/modifying-winver-and-win32-winnt?view=msvc-170
     ALWAYS_DEFINES="-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0602 \
@@ -575,6 +588,9 @@ AC_DEFUN([FLAGS_SETUP_CFLAGS_HELPER],
   elif test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
     TOOLCHAIN_CFLAGS_JVM="-nologo -MD -Zc:preprocessor -Zc:inline -Zc:throwingNew -permissive- -MP"
     TOOLCHAIN_CFLAGS_JDK="-nologo -MD -Zc:preprocessor -Zc:inline -Zc:throwingNew -permissive- -Zc:wchar_t-"
+  elif test "x$TOOLCHAIN_TYPE" = xmscl; then
+    TOOLCHAIN_CFLAGS_JVM="-nologo -MD -Zc:strictStrings"
+    TOOLCHAIN_CFLAGS_JDK="-nologo -MD -Zc:strictStrings -Zc:wchar_t-"
   fi
 
   # Set character encoding in source
@@ -590,7 +606,7 @@ AC_DEFUN([FLAGS_SETUP_CFLAGS_HELPER],
   # CFLAGS C language level for JDK sources (hotspot only uses C++)
   if test "x$TOOLCHAIN_TYPE" = xgcc || test "x$TOOLCHAIN_TYPE" = xclang; then
     LANGSTD_CFLAGS="-std=c11"
-  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     LANGSTD_CFLAGS="-std:c11"
   fi
   TOOLCHAIN_CFLAGS_JDK_CONLY="$LANGSTD_CFLAGS $TOOLCHAIN_CFLAGS_JDK_CONLY"
@@ -598,7 +614,7 @@ AC_DEFUN([FLAGS_SETUP_CFLAGS_HELPER],
   # CXXFLAGS C++ language level for all of JDK, including Hotspot.
   if test "x$TOOLCHAIN_TYPE" = xgcc || test "x$TOOLCHAIN_TYPE" = xclang; then
     LANGSTD_CXXFLAGS="-std=c++17"
-  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     LANGSTD_CXXFLAGS="-std:c++17"
   else
     AC_MSG_ERROR([Cannot enable C++17 for this toolchain])
@@ -614,7 +630,7 @@ AC_DEFUN([FLAGS_SETUP_CFLAGS_HELPER],
     WARNING_CFLAGS_JDK_CXXONLY="$WARNINGS_ENABLE_ALL_CXXFLAGS"
     WARNING_CFLAGS_JVM="$WARNINGS_ENABLE_ALL_CXXFLAGS"
 
-  elif test "x$TOOLCHAIN_TYPE" = xclang; then
+  elif test "x$TOOLCHAIN_TYPE" = xclang -o "x$TOOLCHAIN_TYPE" = xmscl; then
     WARNING_CFLAGS="$WARNINGS_ENABLE_ALL"
 
   elif test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
@@ -644,7 +660,7 @@ AC_DEFUN([FLAGS_SETUP_CFLAGS_HELPER],
   if test "x$TOOLCHAIN_TYPE" = xgcc || test "x$TOOLCHAIN_TYPE" = xclang; then
     PICFLAG="-fPIC"
     PIEFLAG="-fPIE"
-  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     PICFLAG=""
   fi
 
@@ -689,7 +705,7 @@ AC_DEFUN([FLAGS_SETUP_CFLAGS_CPU_DEP],
   fi
 
   # toolchain dependent, per-cpu
-  if test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  if test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     if test "x$FLAGS_CPU" = xaarch64; then
       $1_DEFINES_CPU_JDK="${$1_DEFINES_CPU_JDK} -D_ARM64_ -Darm64"
     elif test "x$FLAGS_CPU" = xx86_64; then
@@ -773,7 +789,7 @@ AC_DEFUN([FLAGS_SETUP_CFLAGS_CPU_DEP],
       $1_CFLAGS_CPU="-mcpu=pwr8"
     fi
 
-  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  elif test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     if test "x$FLAGS_CPU" = xx86; then
       $1_CFLAGS_CPU_JVM="-arch:IA32"
     elif test "x$OPENJDK_TARGET_CPU" = xx86_64; then
@@ -791,7 +807,7 @@ AC_DEFUN([FLAGS_SETUP_CFLAGS_CPU_DEP],
     $1_TOOLCHAIN_CFLAGS="-fno-lifetime-dse"
   fi
 
-  if test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
+  if test "x$TOOLCHAIN_TYPE" = xmicrosoft -o "x$TOOLCHAIN_TYPE" = xmscl; then
     REPRODUCIBLE_CFLAGS="-experimental:deterministic"
     FLAGS_COMPILER_CHECK_ARGUMENTS(ARGUMENT: [${REPRODUCIBLE_CFLAGS}],
         PREFIX: $3,
@@ -814,6 +830,17 @@ AC_DEFUN([FLAGS_SETUP_CFLAGS_CPU_DEP],
       # the __FILE__ macro resolve to paths relative to the workspace root.
       workspace_root_trailing_slash="${WORKSPACE_ROOT%/}/"
       FILE_MACRO_CFLAGS="-fmacro-prefix-map=${workspace_root_trailing_slash}="
+      FLAGS_COMPILER_CHECK_ARGUMENTS(ARGUMENT: [${FILE_MACRO_CFLAGS}],
+          PREFIX: $3,
+          IF_FALSE: [
+              FILE_MACRO_CFLAGS=
+          ]
+      )
+    elif test "x$TOOLCHAIN_TYPE" = xmscl; then
+      # Check if compiler supports -fmacro-prefix-map. If so, use that to make
+      # the __FILE__ macro resolve to paths relative to the workspace root.
+      workspace_root_trailing_slash="${WORKSPACE_ROOT%/}/"
+      FILE_MACRO_CFLAGS="-clang:-fmacro-prefix-map=${workspace_root_trailing_slash}="
       FLAGS_COMPILER_CHECK_ARGUMENTS(ARGUMENT: [${FILE_MACRO_CFLAGS}],
           PREFIX: $3,
           IF_FALSE: [
