@@ -48,7 +48,7 @@ AccessBridgeQueueElement::AccessBridgeQueueElement(char *buf, int size) {
     previous = (AccessBridgeQueueElement *) 0;
     buffer = (char *) malloc(bufsize);
     if (buffer == NULL) {
-        throw std::bad_alloc();
+//        throw std::bad_alloc();
     }
     memcpy(buffer, buf, bufsize);
 }

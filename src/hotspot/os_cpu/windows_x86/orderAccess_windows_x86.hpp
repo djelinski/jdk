@@ -59,7 +59,7 @@ inline void OrderAccess::fence() {
 }
 
 inline void OrderAccess::cross_modify_fence_impl()
-#if _MSC_VER >= 1928
+#if _MSC_VER >= 1928 && !defined(__clang__)
 {
 //_serialize() intrinsic is supported starting from VS2019-16.7.2
   if (VM_Version::supports_serialize()) {

@@ -267,8 +267,7 @@ private:
 //
 #define JP_CA_BASE(name, ca_type) \
     static void name ## Body(ca_type&); \
-    extern "C" UINT __stdcall name(MSIHANDLE hInstall) { \
-        __pragma(comment(linker, "/EXPORT:" __FUNCTION__ "=" __FUNCDNAME__)); \
+    extern "C" __declspec(dllexport) UINT __stdcall name(MSIHANDLE hInstall) { \
         const msi::MsiLogTrigger logTrigger(hInstall); \
         JP_DEBUG_BREAK(JP_CA_DEBUG_BREAK, name); \
         LOG_TRACE_FUNCTION(); \
