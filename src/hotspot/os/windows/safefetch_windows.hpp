@@ -35,7 +35,15 @@ template <class T>
 ATTRIBUTE_NO_ASAN inline T SafeFetchXX(const T* adr, T errValue) {
   T v = 0;
   __try {
+#if defined(__clang__)
+    // work around https://github.com/llvm/llvm-project/issues/62606
+    printf("");
+#endif
     v = *adr;
+#if defined(__clang__)
+    // work around https://github.com/llvm/llvm-project/issues/62606
+    printf("");
+#endif
   }
   __except(EXCEPTION_EXECUTE_HANDLER) {
     v = errValue;
