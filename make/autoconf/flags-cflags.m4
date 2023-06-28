@@ -223,10 +223,10 @@ AC_DEFUN([FLAGS_SETUP_WARNINGS],
 
       # Additional warnings that are not activated by -Wall and -Wextra
       WARNINGS_ENABLE_ADDITIONAL="-Wpointer-arith -Wsign-compare -Wreorder \
-          -Wunused-function -Wundef -Wunused-value -Woverloaded-virtual"
+          -Wunused -Wundef -Wunused-const-variable=2 -Woverloaded-virtual"
       WARNINGS_ENABLE_ALL="-W4 $WARNINGS_ENABLE_ADDITIONAL"
 
-      DISABLED_WARNINGS="unknown-warning-option unused-parameter unused invalid-offsetof"
+      DISABLED_WARNINGS="unknown-warning-option unused-parameter invalid-offsetof"
 
       ;;
 
