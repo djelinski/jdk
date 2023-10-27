@@ -31,7 +31,6 @@
 #include "AccessBridgeMessageQueue.h"
 #include "AccessBridgePackages.h"               // for debugging only
 #include <windows.h>
-#include <malloc.h>
 #include <new>
 
 DEBUG_CODE(extern HWND theDialogWindow);
@@ -46,16 +45,12 @@ AccessBridgeQueueElement::AccessBridgeQueueElement(char *buf, int size) {
     bufsize = size;
     next = (AccessBridgeQueueElement *) 0;
     previous = (AccessBridgeQueueElement *) 0;
-    buffer = (char *) malloc(bufsize);
-    if (buffer == NULL) {
-//        throw std::bad_alloc();
-    }
+    buffer = new char[bufsize];
     memcpy(buffer, buf, bufsize);
 }
 
 AccessBridgeQueueElement::~AccessBridgeQueueElement() {
-    //  delete buffer;
-    free(buffer);
+    delete[] buffer;
 }
 
 
