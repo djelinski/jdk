@@ -159,12 +159,7 @@ endif
 # Save the original path before replacing it with the Visual Studio tools
 ORIGINAL_PATH := @ORIGINAL_PATH@
 
-ifeq (@TOOLCHAIN_TYPE@, microsoft)
-  # The Visual Studio toolchain needs the PATH to be adjusted to include
-  # Visual Studio tools.
-  export PATH := @TOOLCHAIN_PATH@:$(PATH)
-endif
-ifeq (@TOOLCHAIN_TYPE@, clcl)
+ifneq ($(filter @TOOLCHAIN_TYPE@, microsoft clcl), )
   # The Visual Studio toolchain needs the PATH to be adjusted to include
   # Visual Studio tools.
   export PATH := @TOOLCHAIN_PATH@:$(PATH)
