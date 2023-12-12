@@ -36,7 +36,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'c-cpp' ]
-        os: ['macos-latest', 'ubuntu-latest']
+        os: ['macos-13', 'ubuntu-latest']
         # language: [ 'c-cpp', 'java-kotlin', 'javascript-typescript', 'python' ]
         # CodeQL supports [ 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift' ]
         # Use only 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -70,7 +70,7 @@ jobs:
         sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
     - name: 'Install toolchain and dependencies'
-      if: matrix.os == 'macos-latest'
+      if: matrix.os == 'macos-13'
       run: |
         # Run Homebrew installation and xcode-select
         brew install make
