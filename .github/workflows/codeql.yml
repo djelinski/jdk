@@ -70,21 +70,16 @@ jobs:
         fi
         sudo apt-get update
         sudo apt-get install --only-upgrade apt
-        sudo apt-get install gcc-${{ inputs.gcc-major-version }}${{ inputs.gcc-package-suffix }} g++-${{ inputs.gcc-major-version }}${{ inputs.gcc-package-suffix }} libxrandr-dev${{ steps.arch.outputs.suffix }} libxtst-dev${{ steps.arch.outputs.suffix }} libcups2-dev${{ steps.arch.outputs.suffix }} libasound2-dev${{ steps.arch.outputs.suffix }} ${{ inputs.apt-extra-packages }}
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
+        sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
     - name: 'Configure'
       run: >
         bash configure
         --with-conf-name=${{ inputs.platform }}
-        ${{ matrix.flags }}
         --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
         --with-boot-jdk=${{ steps.bootjdk.outputs.path }}
         --with-jtreg=${{ steps.jtreg.outputs.path }}
-        --with-gtest=${{ steps.gtest.outputs.path }}
-        --with-zlib=system
-        --with-jmod-compress=zip-1
-        ${{ inputs.extra-conf-options }} ${{ inputs.configure-arguments }} || (
+        --with-gtest=${{ steps.gtest.outputs.path }} || (
         echo "Dumping config.log:" &&
         cat config.log &&
         exit 1)
