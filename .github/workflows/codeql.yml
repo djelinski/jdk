@@ -16,8 +16,6 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-  schedule:
-    - cron: '45 12 * * 6'
 
 jobs:
   analyze:
@@ -27,7 +25,7 @@ jobs:
     #   - https://gh.io/supported-runners-and-hardware-resources
     #   - https://gh.io/using-larger-runners
     # Consider using larger runners for possible analysis time improvements.
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
     permissions:
       actions: read
@@ -38,6 +36,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'c-cpp' ]
+        os: ['macos-latest', 'ubuntu-latest']
         # language: [ 'c-cpp', 'java-kotlin', 'javascript-typescript', 'python' ]
         # CodeQL supports [ 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift' ]
         # Use only 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -52,7 +51,7 @@ jobs:
       id: bootjdk
       uses: ./.github/actions/get-bootjdk
       with:
-        platform: linux-x64
+        platform: ${{ (matrix.os == 'ubuntu-latest' && 'linux-x64') || 'macos-x64' }}
 
     - name: 'Get JTReg'
       id: jtreg
@@ -63,6 +62,7 @@ jobs:
       uses: ./.github/actions/get-gtest
 
     - name: 'Install toolchain and dependencies'
+      if: matrix.os == 'ubuntu-latest'
       run: |
         # Install dependencies using apt-get
         if [[ '${{ inputs.apt-architecture }}' != '' ]]; then
@@ -72,10 +72,19 @@ jobs:
         sudo apt-get install --only-upgrade apt
         sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
+    - name: 'Install toolchain and dependencies'
+      if: matrix.os == 'macos-latest'
+      run: |
+        # Run Homebrew installation and xcode-select
+        brew install make
+        sudo xcode-select --switch /Applications/Xcode_${{ inputs.xcode-toolset-version }}.app/Contents/Developer
+        # This will make GNU make available as 'make' and not only as 'gmake'
+        echo '/usr/local/opt/make/libexec/gnubin' >> $GITHUB_PATH
+
     - name: 'Configure'
       run: >
         bash configure
-        --with-conf-name=${{ inputs.platform }}
+        --with-conf-name=${{ matrix.os }}
         --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
         --with-boot-jdk=${{ steps.bootjdk.outputs.path }}
         --with-jtreg=${{ steps.jtreg.outputs.path }}
