@@ -200,7 +200,7 @@ public class CK_MECHANISM {
         sb.append(Constants.INDENT);
         sb.append("pParameter:");
         sb.append(Constants.NEWLINE);
-        sb.append(pParameter.toString());
+        sb.append(pParameter);
         sb.append(Constants.NEWLINE);
 
         /*
