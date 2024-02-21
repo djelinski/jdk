@@ -164,6 +164,10 @@ public class CK_MECHANISM {
         init(mechanism, params);
     }
 
+    public CK_MECHANISM(long mechanism, CK_HKDF_PARAMS params) {
+        init(mechanism, params);
+    }
+
     // For PSS. the parameter may be set multiple times, use the
     // CK_MECHANISM(long) constructor and setParameter(CK_RSA_PKCS_PSS_PARAMS)
     // methods instead of creating yet another constructor

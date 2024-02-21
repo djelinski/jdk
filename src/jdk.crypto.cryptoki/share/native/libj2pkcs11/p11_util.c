@@ -429,6 +429,12 @@ void freeCKMechanismPtr(CK_MECHANISM_PTR mechPtr) {
                      free(((CK_PBE_PARAMS_PTR)tmp)->pPassword);
                      free(((CK_PBE_PARAMS_PTR)tmp)->pSalt);
                      break;
+                 case CKM_HKDF_DERIVE:
+                 case CKM_HKDF_DATA:
+                     TRACE0("[ CK_HKDF_PARAMS_PTR ]\n");
+                     free(((CK_HKDF_PARAMS_PTR)tmp)->pInfo);
+                     free(((CK_HKDF_PARAMS_PTR)tmp)->pSalt);
+                     break;
                  default:
                      // currently unsupported mechs by SunPKCS11 provider
                      // CKM_RSA_PKCS_OAEP, CKM_ECMQV_DERIVE,

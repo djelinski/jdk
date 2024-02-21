@@ -680,6 +680,8 @@ public final class SunPKCS11 extends AuthProvider {
                 m(CKM_SHA3_384_KEY_GEN, CKM_GENERIC_SECRET_KEY_GEN));
         dA(KG,  "HmacSHA3-512",    P11KeyGenerator,
                 m(CKM_SHA3_512_KEY_GEN, CKM_GENERIC_SECRET_KEY_GEN));
+        d(KG,  "HKDF",    "sun.security.pkcs11.P11HKDFGenerator",
+                m(CKM_HKDF_DERIVE), m(CKM_SHA256_HMAC, CKM_SHA384_HMAC));
 
         // register (Secret)KeyFactories if there are any mechanisms
         // for a particular algorithm that we support
@@ -1492,6 +1494,8 @@ public final class SunPKCS11 extends AuthProvider {
                 } else if (algorithm == "SunTlsPrf"
                         || algorithm == "SunTls12Prf") {
                     return new P11TlsPrfGenerator(token, algorithm, mechanism);
+                } else if (algorithm == "HKDF") {
+                    return new P11HKDFGenerator(token, algorithm, mechanism);
                 } else {
                     return new P11KeyGenerator(token, algorithm, mechanism);
                 }

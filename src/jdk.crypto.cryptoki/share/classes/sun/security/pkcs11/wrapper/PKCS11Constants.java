@@ -1156,11 +1156,11 @@ public interface PKCS11Constants {
                                                               = 0x00000001L;
     public static final long  CK_SP800_108_DKM_LENGTH_SUM_OF_SEGMENTS
                                                               = 0x00000002L;
-
+    */
     public static final long  CKF_HKDF_SALT_NULL   = 0x00000001L;
     public static final long  CKF_HKDF_SALT_DATA   = 0x00000002L;
     public static final long  CKF_HKDF_SALT_KEY    = 0x00000004L;
-    */
+
 
     // private NSS attribute (for DSA and DH private keys)
     public static final long  CKA_NETSCAPE_DB         = 0xD5A0DB00L;

@@ -1557,6 +1557,10 @@ CK_VOID_PTR jMechParamToCKMechParamPtrSlow(JNIEnv *env, jobject jParam,
         case CKM_KEY_WRAP_SET_OAEP: // CK_KEY_WRAP_SET_OAEP_PARAMS
             p11ThrowPKCS11RuntimeException(env, "No parameter support for this mechanism");
             break;
+        case CKM_HKDF_DERIVE:
+        case CKM_HKDF_DATA:
+            ckpParamPtr = jHkdfParamToCKHkdfParamPtr(env, jParam, ckpLength);
+            break;
         default:
             /* if everything failed up to here */
             /* try if the parameter is a primitive Java type */
@@ -2249,3 +2253,84 @@ cleanup:
     free(ckParamPtr);
     return NULL;
 }
+
+/*
+ * converts the Java CK_HKDF_PARAMS object to a
+ * CK_HKDF_PARAMS pointer
+ *
+ * @param env - used to call JNI funktions to get the Java classes and objects
+ * @param jParam - the Java CK_HKDF_PARAMS object to convert
+ * @param pLength - length of the allocated memory of the returned pointer
+ * @return pointer to the new CK_HKDF_PARAMS structure
+ */
+CK_HKDF_PARAMS_PTR
+jHkdfParamToCKHkdfParamPtr(JNIEnv *env, jobject jParam, CK_ULONG* pLength) {
+    CK_HKDF_PARAMS_PTR ckParamPtr;
+    jclass jHkdfParamsClass;
+    jfieldID fieldID;
+    jboolean jExtract, jExpand;
+    jlong jprfHashMechanism, julSaltType, hSaltKey;
+    jobject jSalt, jInfo;
+
+    if (pLength != NULL) {
+        *pLength = 0L;
+    }
+
+    // retrieve java values
+    jHkdfParamsClass = (*env)->FindClass(env, CLASS_HKDF_PARAMS);
+    if (jHkdfParamsClass == NULL) { return NULL; }
+    fieldID = (*env)->GetFieldID(env, jHkdfParamsClass, "bExtract", "Z");
+    if (fieldID == NULL) { return NULL; }
+    jExtract = (*env)->GetBooleanField(env, jParam, fieldID);
+    fieldID = (*env)->GetFieldID(env, jHkdfParamsClass, "bExpand", "Z");
+    if (fieldID == NULL) { return NULL; }
+    jExpand = (*env)->GetBooleanField(env, jParam, fieldID);
+    fieldID = (*env)->GetFieldID(env, jHkdfParamsClass, "prfHashMechanism", "J");
+    if (fieldID == NULL) { return NULL; }
+    jprfHashMechanism = (*env)->GetLongField(env, jParam, fieldID);
+    fieldID = (*env)->GetFieldID(env, jHkdfParamsClass, "ulSaltType", "J");
+    if (fieldID == NULL) { return NULL; }
+    julSaltType = (*env)->GetLongField(env, jParam, fieldID);
+    fieldID = (*env)->GetFieldID(env, jHkdfParamsClass, "pSalt", "[B");
+    if (fieldID == NULL) { return NULL; }
+    jSalt = (*env)->GetObjectField(env, jParam, fieldID);
+    fieldID = (*env)->GetFieldID(env, jHkdfParamsClass, "hSaltKey", "J");
+    if (fieldID == NULL) { return NULL; }
+    hSaltKey = (*env)->GetLongField(env, jParam, fieldID);
+    fieldID = (*env)->GetFieldID(env, jHkdfParamsClass, "pInfo", "[B");
+    if (fieldID == NULL) { return NULL; }
+    jInfo = (*env)->GetObjectField(env, jParam, fieldID);
+
+    // allocate memory for CK_HKDF_PARAMS pointer
+    ckParamPtr = calloc(1, sizeof(CK_HKDF_PARAMS));
+    if (ckParamPtr == NULL) {
+        p11ThrowOutOfMemoryError(env, 0);
+        return NULL;
+    }
+    ckParamPtr->bExtract = jBooleanToCKBBool(jExtract);
+    ckParamPtr->bExpand = jBooleanToCKBBool(jExpand);
+    ckParamPtr->prfHashMechanism = jLongToCKULong(jprfHashMechanism);
+    ckParamPtr->ulSaltType = jLongToCKULong(julSaltType);
+    jByteArrayToCKByteArray(env, jSalt, &(ckParamPtr->pSalt),
+            &(ckParamPtr->ulSaltLen));
+    if ((*env)->ExceptionCheck(env)) {
+        goto cleanup;
+    }
+    ckParamPtr->hSaltKey = jLongToCKULong(hSaltKey);
+    jByteArrayToCKByteArray(env, jInfo, &(ckParamPtr->pInfo),
+            &(ckParamPtr->ulInfoLen));
+    if ((*env)->ExceptionCheck(env)) {
+        goto cleanup;
+    }
+
+    if (pLength != NULL) {
+        *pLength = sizeof(CK_HKDF_PARAMS);
+    }
+    return ckParamPtr;
+cleanup:
+    free(ckParamPtr->pInfo);
+    free(ckParamPtr->pSalt);
+    free(ckParamPtr);
+    return NULL;
+}
+

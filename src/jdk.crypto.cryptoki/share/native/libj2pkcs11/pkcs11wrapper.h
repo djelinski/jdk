@@ -286,6 +286,8 @@ void printDebug(const char *format, ...);
 #define CLASS_X9_42_DH1_DERIVE_PARAMS "sun/security/pkcs11/wrapper/CK_X9_42_DH1_DERIVE_PARAMS"
 #define CLASS_X9_42_DH2_DERIVE_PARAMS "sun/security/pkcs11/wrapper/CK_X9_42_DH2_DERIVE_PARAMS"
 
+#define CLASS_HKDF_PARAMS "sun/security/pkcs11/wrapper/CK_HKDF_PARAMS"
+
 /*
 #define CLASS_KEA_DERIVE_PARAMS "sun/security/pkcs11/wrapper/CK_KEA_DERIVE_PARAMS"
 #define CLASS_RC2_PARAMS "sun/security/pkcs11/wrapper/CK_RC2_PARAMS"
@@ -400,6 +402,7 @@ CK_ECDH1_DERIVE_PARAMS_PTR jEcdh1DeriveParamToCKEcdh1DeriveParamPtr(JNIEnv *env,
 CK_ECDH2_DERIVE_PARAMS_PTR jEcdh2DeriveParamToCKEcdh2DeriveParamPtr(JNIEnv *env, jobject jParam, CK_ULONG* pLength);
 CK_X9_42_DH1_DERIVE_PARAMS_PTR jX942Dh1DeriveParamToCKX942Dh1DeriveParamPtr(JNIEnv *env, jobject jParam, CK_ULONG* pLength);
 CK_X9_42_DH2_DERIVE_PARAMS_PTR jX942Dh2DeriveParamToCKX942Dh2DeriveParamPtr(JNIEnv *env, jobject jParam, CK_ULONG* pLength);
+CK_HKDF_PARAMS_PTR jHkdfParamToCKHkdfParamPtr(JNIEnv *env, jobject jParam, CK_ULONG* pLength);
 
 /* handling of CK_PKCS5_PBKD2_PARAMS and CK_PKCS5_PBKD2_PARAMS2 */
 typedef enum {PARAMS=0, PARAMS2} ParamVersion;
