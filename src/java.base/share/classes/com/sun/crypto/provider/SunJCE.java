@@ -435,6 +435,9 @@ public final class SunJCE extends Provider {
         psA("KeyGenerator", "HmacSHA3-512",
                 "com.sun.crypto.provider.KeyGeneratorCore$HmacKG$SHA3_512",
                 null);
+        ps("KeyGenerator", "HKDF",
+                "com.sun.crypto.provider.HKDFGenerator",
+                null, null);
 
         psA("KeyPairGenerator", "DiffieHellman",
                 "com.sun.crypto.provider.DHKeyPairGenerator",

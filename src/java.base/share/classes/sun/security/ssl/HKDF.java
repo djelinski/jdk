@@ -25,11 +25,15 @@
 
 package sun.security.ssl;
 
+import com.sun.crypto.provider.HKDFExpandParameterSpec;
+import com.sun.crypto.provider.HKDFExtractParameterSpec;
+
+import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
-import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Objects;
 
@@ -46,6 +50,8 @@ import java.util.Objects;
 public final class HKDF {
     private final Mac hmacObj;
     private final int hmacLen;
+    private final KeyGenerator hkdfObj;
+    private final String hashAlg;
 
     /**
      * Create an HDKF object, specifying the underlying message digest
@@ -63,6 +69,8 @@ public final class HKDF {
         String hmacAlg = "Hmac" + hashAlg.replace("-", "");
         hmacObj = Mac.getInstance(hmacAlg);
         hmacLen = hmacObj.getMacLength();
+        this.hashAlg = hashAlg;
+        hkdfObj = KeyGenerator.getInstance("HKDF");
     }
 
     /**
@@ -87,10 +95,17 @@ public final class HKDF {
         if (salt == null) {
             salt = new SecretKeySpec(new byte[hmacLen], "HKDF-Salt");
         }
-        hmacObj.init(salt);
 
-        return new SecretKeySpec(hmacObj.doFinal(inputKey.getEncoded()),
-                keyAlg);
+        try {
+            hkdfObj.init(new HKDFExtractParameterSpec(hashAlg, salt, inputKey, keyAlg));
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new InvalidKeyException(e);
+        }
+        return hkdfObj.generateKey();
+
+//        hmacObj.init(salt);
+//        return new SecretKeySpec(hmacObj.doFinal(inputKey.getEncoded()),
+//                keyAlg);
     }
 
     /**
@@ -135,51 +150,58 @@ public final class HKDF {
      */
     public SecretKey expand(SecretKey pseudoRandKey, byte[] info, int outLen,
             String keyAlg) throws InvalidKeyException {
-        byte[] kdfOutput;
-
-        // Calculate the number of rounds of HMAC that are needed to
-        // meet the requested data.  Then set up the buffers we will need.
-        Objects.requireNonNull(pseudoRandKey, "A null PRK is not allowed.");
-
-        // Output from the expand operation must be <= 255 * hmac length
-        if (outLen > 255 * hmacLen) {
-            throw new IllegalArgumentException("Requested output length " +
-                    "exceeds maximum length allowed for HKDF expansion");
+        try {
+            hkdfObj.init(new HKDFExpandParameterSpec(hashAlg, pseudoRandKey, info, outLen, keyAlg));
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new InvalidKeyException(e);
         }
-        hmacObj.init(pseudoRandKey);
-        if (info == null) {
-            info = new byte[0];
-        }
-        int rounds = (outLen + hmacLen - 1) / hmacLen;
-        kdfOutput = new byte[rounds * hmacLen];
-        int offset = 0;
-        int tLength = 0;
+        return hkdfObj.generateKey();
 
-        for (int i = 0; i < rounds ; i++) {
-
-            // Calculate this round
-            try {
-                 // Add T(i).  This will be an empty string on the first
-                 // iteration since tLength starts at zero.  After the first
-                 // iteration, tLength is changed to the HMAC length for the
-                 // rest of the loop.
-                hmacObj.update(kdfOutput,
-                        Math.max(0, offset - hmacLen), tLength);
-                hmacObj.update(info);                       // Add info
-                hmacObj.update((byte)(i + 1));              // Add round number
-                hmacObj.doFinal(kdfOutput, offset);
-
-                tLength = hmacLen;
-                offset += hmacLen;                       // For next iteration
-            } catch (ShortBufferException sbe) {
-                // This really shouldn't happen given that we've
-                // sized the buffers to their largest possible size up-front,
-                // but just in case...
-                throw new RuntimeException(sbe);
-            }
-        }
-
-        return new SecretKeySpec(kdfOutput, 0, outLen, keyAlg);
+//        byte[] kdfOutput;
+//
+//        // Calculate the number of rounds of HMAC that are needed to
+//        // meet the requested data.  Then set up the buffers we will need.
+//        Objects.requireNonNull(pseudoRandKey, "A null PRK is not allowed.");
+//
+//        // Output from the expand operation must be <= 255 * hmac length
+//        if (outLen > 255 * hmacLen) {
+//            throw new IllegalArgumentException("Requested output length " +
+//                    "exceeds maximum length allowed for HKDF expansion");
+//        }
+//        hmacObj.init(pseudoRandKey);
+//        if (info == null) {
+//            info = new byte[0];
+//        }
+//        int rounds = (outLen + hmacLen - 1) / hmacLen;
+//        kdfOutput = new byte[rounds * hmacLen];
+//        int offset = 0;
+//        int tLength = 0;
+//
+//        for (int i = 0; i < rounds ; i++) {
+//
+//            // Calculate this round
+//            try {
+//                 // Add T(i).  This will be an empty string on the first
+//                 // iteration since tLength starts at zero.  After the first
+//                 // iteration, tLength is changed to the HMAC length for the
+//                 // rest of the loop.
+//                hmacObj.update(kdfOutput,
+//                        Math.max(0, offset - hmacLen), tLength);
+//                hmacObj.update(info);                       // Add info
+//                hmacObj.update((byte)(i + 1));              // Add round number
+//                hmacObj.doFinal(kdfOutput, offset);
+//
+//                tLength = hmacLen;
+//                offset += hmacLen;                       // For next iteration
+//            } catch (ShortBufferException sbe) {
+//                // This really shouldn't happen given that we've
+//                // sized the buffers to their largest possible size up-front,
+//                // but just in case...
+//                throw new RuntimeException(sbe);
+//            }
+//        }
+//
+//        return new SecretKeySpec(kdfOutput, 0, outLen, keyAlg);
     }
 }
 
