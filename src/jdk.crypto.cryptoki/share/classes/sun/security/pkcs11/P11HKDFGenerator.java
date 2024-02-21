@@ -50,6 +50,10 @@ public class P11HKDFGenerator extends KeyGeneratorSpi {
                 "Must provide underlying HKDF Digest algorithm.");
         CK_HKDF_PARAMS hkdfParams = new CK_HKDF_PARAMS();
         String keyAlg = hParams.getKeyAlg();
+        long keyType = P11SecretKeyFactory.getKeyType(keyAlg);
+        if (keyType < 0) {
+            keyType = CKK_GENERIC_SECRET;
+        }
         boolean isIV = "TlsIv".equals(keyAlg);
         CK_MECHANISM ckMechanism = new CK_MECHANISM(isIV ? CKM_HKDF_DATA : CKM_HKDF_DERIVE, hkdfParams);
         int hmacLen;
@@ -90,8 +94,8 @@ public class P11HKDFGenerator extends KeyGeneratorSpi {
                         try {
                             session = token.getObjSession();
                             CK_ATTRIBUTE[] attributes = token.getAttributes(O_GENERATE,
-                                    CKO_SECRET_KEY, CKK_GENERIC_SECRET, new CK_ATTRIBUTE[]{
-                                            new CK_ATTRIBUTE(CKA_KEY_TYPE, CKK_GENERIC_SECRET)
+                                    CKO_SECRET_KEY, keyType, new CK_ATTRIBUTE[]{
+                                            new CK_ATTRIBUTE(CKA_KEY_TYPE, keyType)
                                     });
                             long keyID = token.p11.C_DeriveKey(session.id(),
                                     ckMechanism, p11KeyID, attributes);
@@ -118,8 +122,8 @@ public class P11HKDFGenerator extends KeyGeneratorSpi {
                             p11KeyID = token.p11.C_CreateObject(session.id(), inputAttributes);
                             try {
                                 CK_ATTRIBUTE[] attributes = token.getAttributes(O_GENERATE,
-                                        CKO_SECRET_KEY, CKK_GENERIC_SECRET, new CK_ATTRIBUTE[]{
-                                                new CK_ATTRIBUTE(CKA_KEY_TYPE, CKK_GENERIC_SECRET)
+                                        CKO_SECRET_KEY, keyType, new CK_ATTRIBUTE[]{
+                                                new CK_ATTRIBUTE(CKA_KEY_TYPE, keyType)
                                         });
                                 long keyID = token.p11.C_DeriveKey(session.id(),
                                         ckMechanism, p11KeyID, attributes);
@@ -156,8 +160,9 @@ public class P11HKDFGenerator extends KeyGeneratorSpi {
                                 attributes = new CK_ATTRIBUTE[]{lenAttribute};
                             } else {
                                 attributes = token.getAttributes(O_GENERATE,
-                                        CKO_SECRET_KEY, CKK_GENERIC_SECRET, new CK_ATTRIBUTE[]{
-                                                new CK_ATTRIBUTE(CKA_KEY_TYPE, CKK_GENERIC_SECRET),
+                                        CKO_SECRET_KEY, keyType, new CK_ATTRIBUTE[]{
+                                                new CK_ATTRIBUTE(CKA_KEY_TYPE, keyType),
+                                                CK_ATTRIBUTE.SIGN_TRUE,
                                                 lenAttribute
                                         });
                             }
