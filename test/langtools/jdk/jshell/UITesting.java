@@ -176,6 +176,7 @@ public class UITesting {
                 }
                 long e =  System.currentTimeMillis();
                 if ((e - s) > TIMEOUT) {
+                    System.out.println("Wait timed out");
                     throw new IllegalStateException("Timeout waiting for: " + quote(expected) + ", actual output so far: " + quote(out.toString()));
                 }
                 try {
