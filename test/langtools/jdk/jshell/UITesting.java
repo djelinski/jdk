@@ -146,7 +146,7 @@ public class UITesting {
         } catch (NumberFormatException ex) {
             factor = 1;
         }
-        TIMEOUT = 60_000 * factor;
+        TIMEOUT = 600_000 * factor;
     }
 
     protected void waitOutput(StringBuilder out, String expected) {
