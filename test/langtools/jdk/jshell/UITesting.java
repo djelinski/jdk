@@ -69,7 +69,12 @@ public class UITesting {
         StringBuilder out = new StringBuilder();
         PrintStream outS = new PrintStream(new OutputStream() {
             @Override public void write(int b) throws IOException {
+                long start = System.nanoTime();
                 synchronized (out) {
+                    long end = System.nanoTime();
+                    if (end - start > 1_000_000_000) {
+                        System.out.print("***write "+(end-start)+"***");
+                    }
                     System.out.print((char) b);
                     out.append((char) b);
                     out.notifyAll();
@@ -180,7 +185,12 @@ public class UITesting {
                     throw new IllegalStateException("Timeout waiting for: " + quote(expected) + ", actual output so far: " + quote(out.toString()));
                 }
                 try {
+                    long start = System.nanoTime();
                     out.wait(TIMEOUT);
+                    long end = System.nanoTime();
+                    if (end - start > 1_000_000_000) {
+                        System.out.print("***waitOutput "+(end-start)+"***");
+                    }
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
                 }
