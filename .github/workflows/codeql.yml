@@ -84,7 +84,7 @@ jobs:
         # Install dependencies using apt-get
         sudo apt-get update
         sudo apt-get install --only-upgrade apt
-        sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev libfontconfig1-dev libfreetype-dev
+        sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev libfontconfig1-dev libfreetype-dev libx11-dev libxext-dev libxrender-dev libxt-dev
 
     - name: 'Install toolchain and dependencies'
       if: matrix.os == 'macos-13'
