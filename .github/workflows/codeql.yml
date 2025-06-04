@@ -18,8 +18,25 @@ on:
     branches: [ "master" ]
 
 jobs:
+  prepare:
+    name: 'Prepare the run'
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: 'Checkout the scripts'
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github
+            make/conf/github-actions.conf
+
+      - name: 'Build JTReg'
+        id: jtreg
+        uses: ./.github/actions/build-jtreg
+
   analyze:
     name: Analyze
+    needs: prepare
     # Runner size impacts CodeQL analysis time. To learn more, please see:
     #   - https://gh.io/recommended-hardware-resources-for-running-codeql
     #   - https://gh.io/supported-runners-and-hardware-resources
@@ -45,7 +62,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: 'Get the BootJDK'
       id: bootjdk
@@ -73,7 +90,7 @@ jobs:
       if: matrix.os == 'macos-13'
       run: |
         # Run Homebrew installation and xcode-select
-        brew install make
+        brew install autoconf make
         sudo xcode-select --switch /Applications/Xcode_14.3.1.app/Contents/Developer
         # This will make GNU make available as 'make' and not only as 'gmake'
         echo '/usr/local/opt/make/libexec/gnubin' >> $GITHUB_PATH
@@ -92,7 +109,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
@@ -106,7 +123,7 @@ jobs:
     # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
     # If this step fails, then you should remove it and run the build manually (see below)
     # - name: Autobuild
-    #   uses: github/codeql-action/autobuild@v2
+    #   uses: github/codeql-action/autobuild@v3
 
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
@@ -119,6 +136,6 @@ jobs:
         make
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"
