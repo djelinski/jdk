@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -155,6 +155,8 @@ int NET_IsEqual(jbyte* caddr1, jbyte* caddr2);
 
 int NET_IsZeroAddr(jbyte* caddr);
 
+int NET_PlatformInit();
+
 /* Socket operations
  *
  * These work just like the system calls, except that they may do some
@@ -180,5 +182,7 @@ jint NET_Wait(JNIEnv *env, jint fd, jint flags, jint timeout);
 int lookupCharacteristicsToAddressFamily(int characteristics);
 
 int addressesInSystemOrder(int characteristics);
+
+int getEnhancedExceptionsAllowed(JNIEnv *env);
 
 #endif /* NET_UTILS_H */
