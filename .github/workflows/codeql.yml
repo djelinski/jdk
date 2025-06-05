@@ -53,7 +53,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'c-cpp' ]
-        os: ['macos-13', 'ubuntu-latest']
+        os: ['ubuntu-latest']
         # language: [ 'c-cpp', 'java-kotlin', 'javascript-typescript', 'python' ]
         # CodeQL supports [ 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift' ]
         # Use only 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -65,10 +65,11 @@ jobs:
       uses: actions/checkout@v4
 
     - name: 'Get the BootJDK'
+      if: matrix.os == 'ubuntu-latest'
       id: bootjdk
       uses: ./.github/actions/get-bootjdk
       with:
-        platform: ${{ (matrix.os == 'ubuntu-latest' && 'linux-x64') || 'macos-x64' }}
+        platform: 'linux-x64'
 
     - name: 'Get JTReg'
       id: jtreg
@@ -85,15 +86,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install --only-upgrade apt
         sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev libfontconfig1-dev libfreetype-dev libx11-dev libxext-dev libxrender-dev libxt-dev
-
-    - name: 'Install toolchain and dependencies'
-      if: matrix.os == 'macos-13'
-      run: |
-        # Run Homebrew installation and xcode-select
-        brew install autoconf make
-        sudo xcode-select --switch /Applications/Xcode_14.3.1.app/Contents/Developer
-        # This will make GNU make available as 'make' and not only as 'gmake'
-        echo '/usr/local/opt/make/libexec/gnubin' >> $GITHUB_PATH
 
     - name: 'Configure'
       run: >
