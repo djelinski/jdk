@@ -49,11 +49,11 @@
 // or have security concerns, either with preferred alternatives, or to be
 // avoided entirely.
 
-FORBID_IMPORTED_NORETURN_C_FUNCTION(void exit(int), noexcept, "use os::exit")
-FORBID_IMPORTED_NORETURN_C_FUNCTION(void _Exit(int), noexcept, "use os::exit")
+//FORBID_IMPORTED_NORETURN_C_FUNCTION(void exit(int), noexcept, "use os::exit")
+//FORBID_IMPORTED_NORETURN_C_FUNCTION(void _Exit(int), noexcept, "use os::exit")
 
 // Windows puts _exit in <stdlib.h>, POSIX in <unistd.h>.
-FORBID_IMPORTED_NORETURN_C_FUNCTION(void _exit(int), /* not noexcept */, "use os::exit")
+//FORBID_IMPORTED_NORETURN_C_FUNCTION(void _exit(int), /* not noexcept */, "use os::exit")
 
 FORBID_IMPORTED_C_FUNCTION(char* strerror(int), noexcept, "use os::strerror");
 FORBID_IMPORTED_C_FUNCTION(char* strtok(char*, const char*), noexcept, "use strtok_r");

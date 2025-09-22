@@ -203,14 +203,14 @@ define SetupNativeCompilationBody
 
   # Prepare for linking
   $$(eval $$(call SetupLinkerFlags,$1))
-  ifneq ($(TOOLCHAIN_TYPE), microsoft)
+  ifeq ($(filter $(TOOLCHAIN_TYPE), microsoft mscl), )
     $$(eval $$(call SetupLinking,$1))
   endif
 
   $$(eval $$(call SetupObjectFileList,$1))
 
   # Link the individually compiled files into a single unit
-  ifneq ($(TOOLCHAIN_TYPE), microsoft)
+  ifeq ($(filter $(TOOLCHAIN_TYPE), microsoft mscl), )
     $$(eval $$(call CreateLinkedResult,$1))
   else
     $$(eval $$(call CreateLinkedResultMicrosoft,$1))
