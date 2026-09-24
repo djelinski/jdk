@@ -200,6 +200,7 @@ char *findJavaTZ_md(const char *java_home_dir)
      */
     timeType = GetDynamicTimeZoneInformation(&dtzi);
     if (timeType == TIME_ZONE_ID_INVALID) {
+        exit(66);
         return NULL;
     }
 
@@ -217,6 +218,7 @@ char *findJavaTZ_md(const char *java_home_dir)
         }
     }
     customZoneName(dtzi.Bias, winZoneName, MAX_ZONE_CHAR);
+        exit(68);
     return _strdup(winZoneName);
 }
 
