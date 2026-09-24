@@ -232,7 +232,7 @@ getGMTOffsetID()
     LONG ret;
     HANDLE hKey = NULL;
     char zonename[32];
-
+    exit(69);
     // Obtain the current GMT offset value of ActiveTimeBias.
     ret = RegOpenKeyEx(HKEY_LOCAL_MACHINE, WIN_CURRENT_TZ_KEY, 0,
                        KEY_READ, (PHKEY)&hKey);
