@@ -1147,13 +1147,6 @@ class Http2Connection implements Closeable {
         throws IOException
     {
         int promisedStreamid = pp.getPromisedStream();
-        if ((promisedStreamid & 0x01) != 0x00) {
-            throw new ProtocolException("Received PUSH_PROMISE for stream " + promisedStreamid);
-        }
-        int streamId = pp.streamid();
-        if ((streamId & 0x01) != 0x01) {
-            throw new ProtocolException("Received PUSH_PROMISE on stream " + streamId);
-        }
         // always decode the headers as they may affect connection-level HPACK
         // decoding state
         assert pushContinuationState == null;

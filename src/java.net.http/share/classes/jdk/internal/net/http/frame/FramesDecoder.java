@@ -495,12 +495,20 @@ public class FramesDecoder {
             return new MalformedFrame(ErrorFrame.PROTOCOL_ERROR,
                     "zero streamId for PushPromiseFrame");
         }
+        if ((streamid & 0x01) != 0x01) {
+            return new MalformedFrame(ErrorFrame.PROTOCOL_ERROR,
+                    "Received PUSH_PROMISE on stream " + streamid);
+        }
         int padLength = 0;
         if ((flags & PushPromiseFrame.PADDED) != 0) {
             padLength = getByte();
             frameLength--;
         }
         int promisedStream = getInt() & 0x7fffffff;
+        if ((promisedStream & 0x01) != 0x00) {
+            return new MalformedFrame(ErrorFrame.PROTOCOL_ERROR,
+                    "Received PUSH_PROMISE for stream " + promisedStream);
+        }
         frameLength -= 4;
         if(frameLength < padLength) {
             return new MalformedFrame(ErrorFrame.PROTOCOL_ERROR,
