@@ -987,13 +987,17 @@ class Http2Connection implements Closeable {
             }
 
             Stream<?> stream = getStream(streamid);
-            var nextstreamid = this.nextstreamid;
-            if (stream == null && (streamid & 0x01) == 0x01 && streamid >= nextstreamid) {
-                String protocolError = String.format(
-                        "received a frame for a non existing streamid(%s) >= nextstreamid(%s)",
-                        streamid, nextstreamid);
-                protocolError(ResetFrame.PROTOCOL_ERROR, protocolError);
-                return;
+            if (stream == null) {
+                int nextid = isServerInitiatedStream(streamid)
+                        ? nextPushStream
+                        : nextstreamid;
+                if (streamid >= nextid) {
+                    String protocolError = String.format(
+                            "received a frame for a non existing streamid(%s) >= nextid(%s)",
+                            streamid, nextid);
+                    protocolError(ResetFrame.PROTOCOL_ERROR, protocolError);
+                    return;
+                }
             }
             PushContinuationState pcs = pushContinuationState;
             if (stream == null && pcs == null) {
@@ -1025,13 +1029,9 @@ class Http2Connection implements Closeable {
                         dropDataFrame(df);
                     }
                     if (isServerInitiatedStream(streamid)) {
-                        if (streamid < nextPushStream) {
-                            // trailing data on a cancelled push promise stream,
-                            // reset will already have been sent, ignore
-                            Log.logTrace("Ignoring cancelled push promise frame " + frame);
-                        } else {
-                            resetStream(streamid, ResetFrame.PROTOCOL_ERROR);
-                        }
+                        // trailing data on a cancelled push promise stream,
+                        // reset will already have been sent, ignore
+                        Log.logTrace("Ignoring cancelled push promise frame " + frame);
                     }
                 }
                 return;
