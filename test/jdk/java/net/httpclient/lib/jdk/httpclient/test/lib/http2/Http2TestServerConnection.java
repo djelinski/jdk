@@ -1163,7 +1163,11 @@ public class Http2TestServerConnection {
                                                    encodeHeaders(op.reqHeaders),
                                                    0);
         pushStreams.add(promisedStreamid);
-        nextPushStreamId += 2;
+        if (properties.getProperty("skipPushIds", "0").equals("1")) {
+            nextPushStreamId += 4;
+        } else {
+            nextPushStreamId += 2;
+        }
         pp.streamid(op.parentStream);
         writeFrame(pp);
         // No need to check for END_HEADERS flag here to allow for tests to simulate bad server side

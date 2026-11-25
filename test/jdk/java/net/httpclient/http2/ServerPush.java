@@ -23,13 +23,17 @@
 
 /*
  * @test
- * @bug 8087112 8159814
+ * @bug 8087112 8159814 8398325
  * @library /test/jdk/java/net/httpclient/lib
  *          /test/lib
  * @build jdk.httpclient.test.lib.http2.Http2TestServer
  *        jdk.httpclient.test.lib.http2.PushHandler
  *        jdk.test.lib.Utils
  * @run junit/othervm
+ *      -Djdk.httpclient.HttpClient.log=errors,requests,responses
+ *      ${test.main.class}
+ * @run junit/othervm
+ *      -Dtest.skipPushIds=1
  *      -Djdk.httpclient.HttpClient.log=errors,requests,responses
  *      ${test.main.class}
  */
@@ -73,7 +77,18 @@ public class ServerPush {
     @BeforeAll
     public static void setup() throws Exception {
         tempFile = createTempFileOfSize(TEMP_FILE_PREFIX, null, FILE_SIZE);
-        server = new Http2TestServer(false, 0);
+        Properties props = new Properties();
+        if (System.getProperty("test.skipPushIds") != null) {
+            // skip some numbers when assigning push stream IDs
+            props.setProperty("skipPushIds", "1");
+        }
+        server = new Http2TestServer("Test_Server",
+                false,
+                0,
+                null,
+                0,
+                props,
+                null);
         server.addHandler(new PushHandler(tempFile, LOOPS), "/");
         System.out.println("Using temp file:" + tempFile);
 
