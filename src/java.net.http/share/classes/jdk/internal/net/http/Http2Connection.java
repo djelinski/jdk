@@ -967,10 +967,23 @@ class Http2Connection implements Closeable {
         if (streamid == 0) {
             handleConnectionFrame(frame);
         } else {
-            if (frame instanceof PushPromiseFrame && !serverPushEnabled()) {
-                String protocolError = "received a PUSH_PROMISE when SETTINGS_ENABLE_PUSH is 0";
-                protocolError(ErrorFrame.PROTOCOL_ERROR, protocolError);
-                return;
+            if (frame instanceof PushPromiseFrame ppf) {
+                if (!serverPushEnabled()) {
+                    String protocolError = "received a PUSH_PROMISE when SETTINGS_ENABLE_PUSH is 0";
+                    protocolError(ErrorFrame.PROTOCOL_ERROR, protocolError);
+                    return;
+                }
+                int pushId = ppf.getPromisedStream();
+                if (pushId < nextPushStream) {
+                    // From RFC 9113 section 5.1.1:
+                    // The identifier of a newly established stream MUST be numerically
+                    // greater than all streams that the initiating endpoint has
+                    // opened or reserved.
+                    protocolError(ErrorFrame.PROTOCOL_ERROR, String.format(
+                            "Unexpected stream identifier: %s < %s", pushId, nextPushStream));
+                    return;
+                }
+                nextPushStream = pushId + 2;
             }
 
             Stream<?> stream = getStream(streamid);
@@ -1184,24 +1197,9 @@ class Http2Connection implements Closeable {
             return;
         }
         HttpRequestImpl parentReq = parent.request;
-        if (promisedStreamid < nextPushStream) {
-            // From RFC 9113 section 5.1.1:
-            // The identifier of a newly established stream MUST be numerically
-            // greater than all streams that the initiating endpoint has
-            // opened or reserved.
-            protocolError(ResetFrame.PROTOCOL_ERROR, String.format(
-                    "Unexpected stream identifier: %s < %s", promisedStreamid, nextPushStream));
-            return;
-        }
-        if (promisedStreamid != nextPushStream) {
-            // we don't support skipping stream ids;
-            resetStream(promisedStreamid, ResetFrame.PROTOCOL_ERROR);
-            return;
-        } else if (!reserveStream(false, true)) {
+        if (!reserveStream(false, true)) {
             resetStream(promisedStreamid, ResetFrame.REFUSED_STREAM);
             return;
-        } else {
-            nextPushStream += 2;
         }
 
         HttpRequestImpl pushReq = HttpRequestImpl.createPushRequest(parentReq, headers);
